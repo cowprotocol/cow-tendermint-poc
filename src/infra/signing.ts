@@ -1,10 +1,12 @@
 import { ethers } from "ethers";
 import * as domain from "../domain";
+import { logger } from "./logging";
 
 export class Signer {
   wallet: ethers.Wallet;
   constructor(privateKey: string) {
     this.wallet = new ethers.Wallet(privateKey);
+    logger.info(`Signing with address ${this.wallet.address}`);
   }
 
   address() {

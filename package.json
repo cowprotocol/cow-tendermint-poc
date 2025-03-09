@@ -19,7 +19,8 @@
     "dotenv": "^16.4.7",
     "ethers": "^6.13.5",
     "libp2p": "^2.7.4",
-    "tslog": "^4.9.3"
+    "tslog": "^4.9.3",
+    "tsx": "^4.19.3"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
