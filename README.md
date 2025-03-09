@@ -11,5 +11,5 @@ A multi-proposer tendermint implementation for the CoW Protocol auction.
 export PK=$(hexdump -vn32 -e'"0x" 8/4 "%08x" 1 "\n"' /dev/urandom)
 ```
 
-3. Run the script with `npm tsx index.ts`
+3. Run the script with `npx tsx index.ts`
 4. Make sure that the address with which you are signing is added to the validator/solver registry (cf. `.env` file for addresses)

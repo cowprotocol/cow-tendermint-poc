@@ -19,7 +19,7 @@ export class Node {
       transports: [tcp()],
       streamMuxers: [yamux()],
       addresses: {
-        listen: ["/ip4/127.0.0.1/tcp/0"],
+        listen: ["/ip4/127.0.0.1/tcp/35035"],
       },
       connectionEncrypters: [noise()],
       peerDiscovery: [mdns()],
