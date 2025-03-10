@@ -5,6 +5,7 @@ import { yamux } from "@chainsafe/libp2p-yamux";
 import { identify } from "@libp2p/identify";
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { mdns } from "@libp2p/mdns";
+import { bootstrap } from '@libp2p/bootstrap'
 import { logger } from "./logging";
 
 // Mapping of topic to message handler
@@ -14,15 +15,21 @@ export class Node {
   node: Promise<Libp2p>;
   listeners: Listener[];
 
-  constructor() {
+  constructor(bootstapNode?: string) {
+    const peerDiscovery = [mdns()]
+    if (bootstapNode) {
+      peerDiscovery.push(bootstrap({
+        list: [bootstapNode]
+      }))
+    }
     this.node = createLibp2p({
       transports: [tcp()],
       streamMuxers: [yamux()],
       addresses: {
-        listen: ["/ip4/127.0.0.1/tcp/35035"],
+        listen: ["/ip4/0.0.0.0/tcp/0"],
       },
       connectionEncrypters: [noise()],
-      peerDiscovery: [mdns()],
+      peerDiscovery,
       services: {
         pubsub: gossipsub(),
         identify: identify(),
