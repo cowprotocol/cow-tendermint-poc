@@ -7,6 +7,7 @@ import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { mdns } from "@libp2p/mdns";
 import { bootstrap } from '@libp2p/bootstrap'
 import { logger } from "./logging";
+import { webSockets } from "@libp2p/websockets";
 
 // Mapping of topic to message handler
 type Listener = { [id: string]: (message: Uint8Array) => void };
@@ -23,10 +24,13 @@ export class Node {
       }))
     }
     this.node = createLibp2p({
-      transports: [tcp()],
+      transports: [tcp(), webSockets()],
       streamMuxers: [yamux()],
       addresses: {
-        listen: ["/ip4/0.0.0.0/tcp/0"],
+        listen: [
+          "/ip4/0.0.0.0/tcp/0",
+          "/ip4/0.0.0.0/tcp/0/ws"
+        ],
       },
       connectionEncrypters: [noise()],
       peerDiscovery,

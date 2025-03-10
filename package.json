@@ -17,6 +17,7 @@
     "@libp2p/identify": "^3.0.23",
     "@libp2p/mdns": "^11.0.28",
     "@libp2p/tcp": "^10.1.4",
+    "@libp2p/websockets": "^9.2.6",
     "dotenv": "^16.4.7",
     "ethers": "^6.13.5",
     "libp2p": "^2.7.4",

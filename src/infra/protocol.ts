@@ -26,15 +26,18 @@ export class Protocol {
   public toListener() {
     return {
       "/cow/0.0.1/bid": (data: Uint8Array) => {
-        const bid = JSON.parse(data.toString());
+        const payload = new TextDecoder().decode(data);
+        const bid = JSON.parse(payload);
         this.onBid(bid);
       },
       "/cow/0.0.1/prevote": (data: Uint8Array) => {
-        const prevote = JSON.parse(data.toString());
+        const payload = new TextDecoder().decode(data);
+        const prevote = JSON.parse(payload);
         this.onPrevote(prevote);
       },
       "/cow/0.0.1/precommit": (data: Uint8Array) => {
-        const precommit = JSON.parse(data.toString());
+        const payload = new TextDecoder().decode(data);
+        const precommit = JSON.parse(payload);
         this.onPrecommit(precommit);
       },
     };
