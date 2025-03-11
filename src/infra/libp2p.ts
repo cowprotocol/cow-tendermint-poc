@@ -8,6 +8,7 @@ import { mdns } from "@libp2p/mdns";
 import { bootstrap } from '@libp2p/bootstrap'
 import { logger } from "./logging";
 import { webSockets } from "@libp2p/websockets";
+import { kadDHT } from '@libp2p/kad-dht'
 
 // Mapping of topic to message handler
 type Listener = { [id: string]: (message: Uint8Array) => void };
@@ -37,6 +38,9 @@ export class Node {
       services: {
         pubsub: gossipsub(),
         identify: identify(),
+        dht: kadDHT({
+          clientMode: false
+        })
       },
     }).then((node) => {
       logger.info(`Started ${node.getMultiaddrs()}`);
