@@ -34,7 +34,7 @@ export class Node {
       ],
     }
     if (multiaddress) {
-      addresses.listen.push(multiaddress)
+      addresses.announce = [multiaddress]
     }
 
     this.node = createLibp2p({
@@ -54,9 +54,9 @@ export class Node {
       logger.info(`Started ${node.getMultiaddrs()}`);
 
       node.addEventListener("peer:discovery", (evt) => {
-        const peer = evt.detail;
-        logger.info(`Discovered: ${peer.multiaddrs}, connecting...`);
-        node.dial(peer.id).catch((err) => {
+        const peer = evt.detail.id;
+        logger.info(`Discovered: ${peer}, connecting...`);
+        node.dial(peer).catch((err) => {
           logger.warn(`Failed dialing ${peer}, err: ${err}`);
         });
       });
