@@ -6,7 +6,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 async function main() {
-  const node = new infra.Node(process.argv[2]);
+  const bootstapNode = process.argv[2];
+  const node = new infra.Node(bootstapNode, parseInt(process.env.PORT || "0"), process.env.MULTIADDRESS);
   const protocol = new infra.Protocol(node);
   const provider = new ethers.JsonRpcProvider(process.env.RPC_URL!);
   const validators = new infra.Registry(

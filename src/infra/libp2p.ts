@@ -1,5 +1,4 @@
 import { createLibp2p, Libp2p } from "libp2p";
-import { tcp } from "@libp2p/tcp";
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
 import { identify } from "@libp2p/identify";
@@ -8,7 +7,8 @@ import { mdns } from "@libp2p/mdns";
 import { bootstrap } from '@libp2p/bootstrap'
 import { logger } from "./logging";
 import { webSockets } from "@libp2p/websockets";
-import { kadDHT } from '@libp2p/kad-dht'
+import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
+import { uPnPNAT } from '@libp2p/upnp-nat'
 
 // Mapping of topic to message handler
 type Listener = { [id: string]: (message: Uint8Array) => void };
@@ -17,38 +17,46 @@ export class Node {
   node: Promise<Libp2p>;
   listeners: Listener[];
 
-  constructor(bootstapNode?: string) {
-    const peerDiscovery = [mdns()]
+  constructor(bootstapNode?: string, port?: number, multiaddress?: string) {
+
+    // Set up peer discovery
+    const peerDiscovery = [mdns(), pubsubPeerDiscovery()];
     if (bootstapNode) {
       peerDiscovery.push(bootstrap({
         list: [bootstapNode]
       }))
     }
+
+    // Set up incoming connections
+    const addresses = {
+      listen: [
+        `/ip4/0.0.0.0/tcp/${port}/ws`
+      ],
+    }
+    if (multiaddress) {
+      addresses.listen.push(multiaddress)
+    }
+
     this.node = createLibp2p({
-      transports: [tcp(), webSockets()],
+      transports: [webSockets()],
       streamMuxers: [yamux()],
-      addresses: {
-        listen: [
-          "/ip4/0.0.0.0/tcp/0",
-          "/ip4/0.0.0.0/tcp/0/ws"
-        ],
-      },
+      addresses,
       connectionEncrypters: [noise()],
       peerDiscovery,
       services: {
         pubsub: gossipsub(),
         identify: identify(),
-        dht: kadDHT({
-          clientMode: false
-        })
+        upnpNAT: uPnPNAT({
+          autoConfirmAddress: true
+        }),
       },
     }).then((node) => {
       logger.info(`Started ${node.getMultiaddrs()}`);
 
       node.addEventListener("peer:discovery", (evt) => {
-        const peer = evt.detail.id;
-        logger.info(`Discovered: ${peer}, connecting...`);
-        node.dial(peer).catch((err) => {
+        const peer = evt.detail;
+        logger.info(`Discovered: ${peer.multiaddrs}, connecting...`);
+        node.dial(peer.id).catch((err) => {
           logger.warn(`Failed dialing ${peer}, err: ${err}`);
         });
       });
@@ -61,7 +69,6 @@ export class Node {
       setInterval(function () {
         logger.debug(`Connected to ${node.getPeers().length} peers`);
       }, 10000);
-
       return node;
     });
   }
