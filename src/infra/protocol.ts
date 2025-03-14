@@ -7,20 +7,12 @@ import { Node } from "./libp2p";
  */
 export class Protocol {
   node: Node;
-  validator?: domain.Validator;
-  solver?: domain.Solver;
+  domain: domain.Protocol;
 
-  constructor(node: Node) {
+  constructor(node: Node, domain: domain.Protocol) {
+    this.domain = domain
     this.node = node;
     node.addListener(this.toListener());
-  }
-
-  public setValidator(validator: domain.Validator) {
-    this.validator = validator;
-  }
-
-  public setSolver(solver: domain.Solver) {
-    this.solver = solver;
   }
 
   public toListener() {
@@ -44,15 +36,15 @@ export class Protocol {
   }
 
   public onBid(bid: domain.Bid) {
-    this.validator?.onBid(bid);
+    this.domain.onBid(bid);
   }
 
   public onPrevote(prevote: domain.Prevote) {
-    this.validator?.onPrevote(prevote);
+    this.domain.onPrevote(prevote);
   }
 
   public onPrecommit(precommit: domain.Precommit) {
-    this.solver?.onPrecommit(precommit);
+    this.domain.onPrecommit(precommit);
   }
 
   public async bid(payload: domain.Bid) {

@@ -56,16 +56,11 @@ export class Store {
     return true;
   }
 
-  getPrevote(auction: number, solver: string, validator: string) {
-    return this.prevotes.get(auction)?.get(solver)?.get(validator);
-  }
-
   getPrevoteCount(
-    bid: domain.BidPayload | domain.EmptyBidPayload,
-    solver: string
+    bid: domain.BidPayload | domain.EmptyBidPayload
   ) {
     let count = 0;
-    for (const [_, prevote] of this.prevotes.get(bid.auction)?.get(solver) ||
+    for (const [_, prevote] of this.prevotes.get(bid.auction)?.get(bid.solver) ||
       []) {
       // TODO: proper equality check
       if (JSON.stringify(prevote) === JSON.stringify(bid)) {
@@ -92,13 +87,13 @@ export class Store {
     return true;
   }
 
-  getPrecommitCount(prevote: domain.PrevotePayload | domain.EmptyBidPayload) {
+  getPrecommitCount(bid: domain.BidPayload | domain.EmptyBidPayload) {
     let count = 0;
     for (const [_, precommit] of this.precommits
-      .get(prevote.auction)
-      ?.get(prevote.solver) || []) {
+      .get(bid.auction)
+      ?.get(bid.solver) || []) {
       // TODO: proper equality check
-      if (JSON.stringify(precommit) === JSON.stringify(prevote)) {
+      if (JSON.stringify(precommit) === JSON.stringify(bid)) {
         count++;
       }
     }

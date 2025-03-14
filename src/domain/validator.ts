@@ -6,20 +6,19 @@ const logger = infra.logger;
 
 export class Validator {
   protocol: infra.Protocol;
-  validators: infra.Registry;
   solvers: infra.Registry;
   signer: infra.Signer;
   store: infra.Store;
 
   constructor(
     protocol: infra.Protocol,
-    validators: infra.Registry,
     solvers: infra.Registry,
     signer: infra.Signer,
     store: infra.Store
   ) {
+    logger.info("Running Validator");
+
     this.protocol = protocol;
-    this.validators = validators;
     this.solvers = solvers;
     this.signer = signer;
     this.store = store;
@@ -29,23 +28,7 @@ export class Validator {
     }, 0);
   }
 
-  public async onBid(bid: Bid) {
-    const solver = this.signer.recoverBid(bid);
-    if (!(await this.solvers.getAddresses()).includes(solver)) {
-      logger.debug(`Received bid from unknown solver: ${solver}`);
-      return;
-    }
-
-    logger.debug(`Received bid: ${JSON.stringify(bid)} from ${solver}`);
-
-    if (!this.store.addBid(bid.payload.auction, solver, bid.payload)) {
-      logger.error(
-        `Solver ${solver} has already bid for auction ${bid.payload.auction}`
-      );
-      // TODO: slash
-      return;
-    }
-
+  public async onBid(bid: Bid, solver: string) {
     const payload = {
       auction: bid.payload.auction,
       solver,
@@ -58,45 +41,7 @@ export class Validator {
     await this.protocol.prevote(prevote);
   }
 
-  public async onPrevote(prevote: Prevote) {
-    const validatorCount = (await this.validators.getAddresses()).length;
-    const validator = this.signer.recoverPrecommit(prevote);
-    if (!(await this.validators.getAddresses()).includes(validator)) {
-      logger.debug(`Received prevote from unknown validator: ${validator}`);
-      return;
-    }
-
-    logger.debug(
-      `Received prevote: ${JSON.stringify(prevote)} from ${validator}`
-    );
-
-    if (
-      !this.store.addPrevote(
-        prevote.payload.auction,
-        validator,
-        prevote.payload
-      )
-    ) {
-      logger.error(`Received duplicate prevote from ${validator}`);
-      // TODO: slash
-      return;
-    }
-
-    const bid = this.store.getBid(
-      prevote.payload.auction,
-      prevote.payload.solver
-    );
-
-    if (
-      // We can't precommit if we don't have a bid
-      !bid ||
-      // Or if we haven't received enough prevotes
-      this.store.getPrevoteCount(bid, prevote.payload.solver) !==
-        Math.ceil((validatorCount * 2) / 3)
-    ) {
-      return;
-    }
-
+  public async onPrevoteQuorum(prevote: Prevote) {
     const precommit = {
       payload: prevote.payload,
       signature: this.signer.signPrecommit(prevote.payload),
