@@ -5,7 +5,7 @@ import { identify } from "@libp2p/identify";
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { mdns } from "@libp2p/mdns";
 import { bootstrap } from '@libp2p/bootstrap'
-import { logger } from "./logging";
+import { logger as createLogger, Logger } from "./logging";
 import { webSockets } from "@libp2p/websockets";
 import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
 import { uPnPNAT } from '@libp2p/upnp-nat'
@@ -16,8 +16,12 @@ type Listener = { [id: string]: (message: Uint8Array) => void };
 export class Node {
   node: Promise<Libp2p>;
   listeners: Listener[];
+  logger: Logger;
 
   constructor(bootstapNode?: string, port?: number, multiaddress?: string) {
+    // local variable needed for .then() callbacks
+    this.logger = createLogger("libp2p");
+    const logger = this.logger;
 
     // Set up peer discovery
     const peerDiscovery = [mdns(), pubsubPeerDiscovery()];
@@ -51,7 +55,7 @@ export class Node {
         }),
       },
     }).then((node) => {
-      logger.info(`Started ${node.getMultiaddrs()}`);
+      logger.info(`Node started, peers can connect via: [${node.getMultiaddrs()}]`);
 
       node.addEventListener("peer:discovery", (evt) => {
         const peer = evt.detail.id;
@@ -67,13 +71,14 @@ export class Node {
       });
 
       setInterval(function () {
-        logger.debug(`Connected to ${node.getPeers().length} peers`);
+        logger.info(`Connected to ${node.getPeers().length} peers`);
       }, 10000);
       return node;
     });
   }
 
   public async addListener(listener: Listener) {
+    const logger = this.logger;
     this.node
       .then((node) => {
         for (const topic in listener) {
@@ -93,6 +98,7 @@ export class Node {
 
   public async publish(topic: string, payload: Uint8Array) {
     const node = await this.node;
+    const logger = this.logger;
     await (node.services.pubsub as PubSub<GossipSubEvents>)
       .publish(topic, payload)
       .catch((err) => {

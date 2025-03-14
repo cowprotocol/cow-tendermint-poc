@@ -9,6 +9,7 @@ export class Validator {
   solvers: infra.Registry;
   signer: infra.Signer;
   store: infra.Store;
+  logger: infra.Logger;
 
   constructor(
     protocol: infra.Protocol,
@@ -16,7 +17,8 @@ export class Validator {
     signer: infra.Signer,
     store: infra.Store
   ) {
-    logger.info("Running Validator");
+    this.logger = infra.logger("validator");
+    this.logger.info("Running Validator");
 
     this.protocol = protocol;
     this.solvers = solvers;
@@ -46,7 +48,7 @@ export class Validator {
       payload: prevote.payload,
       signature: this.signer.signPrecommit(prevote.payload),
     };
-    logger.debug(`Precommitting: ${JSON.stringify(precommit)}`);
+    this.logger.debug(`Precommitting: ${JSON.stringify(precommit)}`);
     await this.protocol.precommit(precommit);
   }
 
@@ -56,7 +58,7 @@ export class Validator {
         continue;
       }
 
-      logger.debug(`Issuing vote for empty bid for ${address}`);
+      this.logger.debug(`Issuing vote for empty bid for ${address}`);
       const payload = {
         auction,
         solver: address,

@@ -9,6 +9,7 @@ export class Consensus {
     solvers: infra.Registry;
     signer: infra.Signer;
     store: infra.Store;
+    logger: infra.Logger;
 
     validator?: domain.Validator;
     solver?: domain.Solver;
@@ -23,19 +24,20 @@ export class Consensus {
         this.solvers = solvers;
         this.signer = signer;
         this.store = store;
+        this.logger = infra.logger("consensus");
     }
 
     public async onBid(bid: Bid) {
       const solver = this.signer.recoverBid(bid);
       if (!(await this.solvers.getAddresses()).includes(solver)) {
-        logger.debug(`Received bid from unknown solver: ${solver}`);
+        this.logger.debug(`Received bid from unknown solver: ${solver}`);
         return;
       }
   
-      logger.debug(`Received bid: ${JSON.stringify(bid)} from ${solver}`);
+      this.logger.debug(`Received bid: ${JSON.stringify(bid)} from ${solver}`);
   
       if (!this.store.addBid(bid.payload.auction, solver, bid.payload)) {
-        logger.error(
+        this.logger.error(
           `Solver ${solver} has already bid for auction ${bid.payload.auction}`
         );
         // TODO: slash
@@ -49,11 +51,11 @@ export class Consensus {
       const validatorCount = (await this.validators.getAddresses()).length;
       const validator = this.signer.recoverPrecommit(prevote);
       if (!(await this.validators.getAddresses()).includes(validator)) {
-        logger.debug(`Received prevote from unknown validator: ${validator}`);
+        this.logger.debug(`Received prevote from unknown validator: ${validator}`);
         return;
       }
   
-      logger.debug(
+      this.logger.debug(
         `Received prevote: ${JSON.stringify(prevote)} from ${validator}`
       );
   
@@ -64,7 +66,7 @@ export class Consensus {
           prevote.payload
         )
       ) {
-        logger.error(`Received duplicate prevote from ${validator}`);
+        this.logger.error(`Received duplicate prevote from ${validator}`);
         // TODO: slash
         return;
       }
@@ -93,11 +95,11 @@ export class Consensus {
     
         const validator = this.signer.recoverPrecommit(precommit);
         if (!(await this.validators.getAddresses()).includes(validator)) {
-          logger.debug(`Received precommit from unknown validator: ${validator}`);
+          this.logger.debug(`Received precommit from unknown validator: ${validator}`);
           return;
         }
     
-        logger.debug(
+        this.logger.debug(
           `Received precommit: ${JSON.stringify(precommit)} from ${validator}`
         );
     
@@ -108,7 +110,7 @@ export class Consensus {
             precommit.payload
           )
         ) {
-          logger.error(`Received duplicate precommit from ${validator}`);
+          this.logger.error(`Received duplicate precommit from ${validator}`);
           // TODO: slash
           return;
         }
@@ -123,7 +125,7 @@ export class Consensus {
         ) {
           return;
         }
-        logger.debug(`Bid ${JSON.stringify(precommit.payload)} is finalized.`);
+        this.logger.debug(`Bid ${JSON.stringify(precommit.payload)} is finalized.`);
         
         this.onPrecommitQuorum(precommit.payload.auction, solvers, validators);
       }

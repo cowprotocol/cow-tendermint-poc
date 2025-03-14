@@ -1,5 +1,5 @@
 import * as infra from "../infra";
-import { Precommit, BidPayload, EmptyBidPayload } from "./model";
+import { BidPayload, EmptyBidPayload } from "./model";
 import { schedule } from "./schedule";
 
 const logger = infra.logger;
@@ -7,12 +7,14 @@ const logger = infra.logger;
 export class Solver {
   protocol: infra.Protocol;
   signer: infra.Signer;
+  logger = infra.Logger;
 
   constructor(
     protocol: infra.Protocol,
     signer: infra.Signer,
   ) {
-    logger.info("Running Solver");
+    this.logger = infra.logger("solver");
+    this.logger.info("Running Solver");
 
     this.protocol = protocol;
     this.signer = signer;
@@ -24,7 +26,7 @@ export class Solver {
   }
 
   onAuctionFinalized(auction: number, bids: (BidPayload | EmptyBidPayload)[]) {
-    logger.info(`Auction ${auction} is finalized: ${JSON.stringify(bids)}`);
+    this.logger.info(`Auction ${auction} is finalized: ${JSON.stringify(bids)}`);
   }
 
   bid(auction: number) {
@@ -33,7 +35,7 @@ export class Solver {
       solver: this.signer.address(),
       value: Math.random(),
     };
-    logger.info(`Issuing bid: ${JSON.stringify(payload)}`);
+    this.logger.info(`Issuing bid: ${JSON.stringify(payload)}`);
     this.protocol.bid({
       payload,
       signature: this.signer.signBid(payload),
