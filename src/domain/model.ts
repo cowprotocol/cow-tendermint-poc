@@ -10,8 +10,9 @@ export interface EmptyBidPayload {
 }
 
 export interface Bid {
-  payload: BidPayload;
+  payload: BidPayload | EmptyBidPayload;
   signature: string;
+  timestamp: number;
 }
 
 export interface PrevotePayload {
@@ -24,6 +25,7 @@ export interface PrevotePayload {
 export interface Prevote {
   payload: PrevotePayload | EmptyBidPayload;
   signature: string;
+  timestamp: number;
 }
 
 export interface PrecommitPayload {
@@ -37,4 +39,5 @@ export interface PrecommitPayload {
 export interface Precommit {
   payload: PrecommitPayload | EmptyBidPayload;
   signature: string;
+  timestamp: number;
 }

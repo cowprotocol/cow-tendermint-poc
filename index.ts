@@ -54,6 +54,8 @@ async function main() {
     );
     consensus.solver = solver;
   }
+
+  infra.metrics.serve(parseInt(process.env.METRICS_PORT || "0"));
 }
 
 main().catch((err) => {

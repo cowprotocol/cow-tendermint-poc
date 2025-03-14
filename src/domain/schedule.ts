@@ -1,4 +1,5 @@
 const AUCTION_FREQUENCY_MILLIS = 10_000;
+export const SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS = 2_000;
 
 /**
  * Schedule a job to check after every auction deadline if any solvers haven't bid and cast an empty vote for them.
@@ -22,4 +23,8 @@ export function schedule(job: (number) => void, milliseconds_before_deadline: nu
 function step(job: (number) => void, milliseconds_before_deadline:number, auction:number ) {
   job(auction);
   schedule(job, milliseconds_before_deadline);
+}
+
+export function getBiddingStartTime(auction: number) {
+  return ((auction + 1) * AUCTION_FREQUENCY_MILLIS) - SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS;
 }

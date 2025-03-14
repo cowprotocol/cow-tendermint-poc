@@ -1,8 +1,6 @@
 import * as infra from "../infra";
-import { Bid, Prevote, Precommit, BidPayload, EmptyBidPayload } from "./model";
+import { Bid, Prevote } from "./model";
 import { schedule } from "./schedule";
-
-const logger = infra.logger;
 
 export class Validator {
   protocol: infra.Protocol;
@@ -39,6 +37,7 @@ export class Validator {
     const prevote = {
       payload,
       signature: this.signer.signPrevote(payload),
+      timestamp: Date.now(),
     };
     await this.protocol.prevote(prevote);
   }
@@ -47,6 +46,7 @@ export class Validator {
     const precommit = {
       payload: prevote.payload,
       signature: this.signer.signPrecommit(prevote.payload),
+      timestamp: Date.now(),
     };
     this.logger.debug(`Precommitting: ${JSON.stringify(precommit)}`);
     await this.protocol.precommit(precommit);
@@ -64,10 +64,15 @@ export class Validator {
         solver: address,
       };
 
-      this.store.addBid(auction, address, payload);
+      this.store.addBid({
+        payload,
+        signature: "",
+        timestamp: Date.now(),
+      });
       const prevote = {
         payload,
         signature: this.signer.signPrevote(payload),
+        timestamp: Date.now(),
       };
       await this.protocol.prevote(prevote);
     }

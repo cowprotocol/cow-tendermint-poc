@@ -1,8 +1,6 @@
 import * as infra from "../infra";
 import { BidPayload, EmptyBidPayload } from "./model";
-import { schedule } from "./schedule";
-
-const logger = infra.logger;
+import { schedule, SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS} from "./schedule";
 
 export class Solver {
   protocol: infra.Protocol;
@@ -22,7 +20,7 @@ export class Solver {
     // Bid 2s before the end of the auction
     schedule((auction) => {
       this.bid(auction);
-    }, 2000);
+    }, SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS);
   }
 
   onAuctionFinalized(auction: number, bids: (BidPayload | EmptyBidPayload)[]) {
@@ -39,6 +37,7 @@ export class Solver {
     this.protocol.bid({
       payload,
       signature: this.signer.signBid(payload),
+      timestamp: Date.now(),
     });
   }
 }

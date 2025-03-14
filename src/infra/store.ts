@@ -1,9 +1,8 @@
 import * as domain from "../domain";
-import { logger } from "./logging";
 
 export class Store {
   // Mapping of auction => (solver => bid)
-  bids: Map<number, Map<string, domain.BidPayload | domain.EmptyBidPayload>>;
+  bids: Map<number, Map<string, domain.Bid>>;
 
   // Mapping of auction => (solver => (validator => prevote))
   prevotes: Map<
@@ -23,17 +22,13 @@ export class Store {
     this.precommits = new Map();
   }
 
-  addBid(
-    auction: number,
-    solver: string,
-    bid: domain.BidPayload | domain.EmptyBidPayload
-  ) {
-    this.ensureAuction(auction, solver);
+  addBid(bid: domain.Bid) {
+    this.ensureAuction(bid.payload.auction, bid.payload.solver);
     // TODO exact same bid is ok
-    if (this.bids.get(auction)!.has(solver)) {
+    if (this.bids.get(bid.payload.auction)!.has(bid.payload.solver)) {
       return false;
     }
-    this.bids.get(auction)!.set(solver, bid);
+    this.bids.get(bid.payload.auction)!.set(bid.payload.solver, bid);
     return true;
   }
 
