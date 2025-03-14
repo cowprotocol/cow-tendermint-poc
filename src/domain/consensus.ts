@@ -4,7 +4,7 @@ import { Bid, Prevote, Precommit, BidPayload, EmptyBidPayload } from "./model";
 
 const logger = infra.logger;
 
-export class Protocol {
+export class Consensus {
     validators: infra.Registry;
     solvers: infra.Registry;
     signer: infra.Signer;
@@ -123,7 +123,7 @@ export class Protocol {
         ) {
           return;
         }
-        logger.info(`Bid ${JSON.stringify(precommit.payload)} is finalized.`);
+        logger.debug(`Bid ${JSON.stringify(precommit.payload)} is finalized.`);
         
         this.onPrecommitQuorum(precommit.payload.auction, solvers, validators);
       }

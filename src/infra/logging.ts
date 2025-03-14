@@ -1,4 +1,4 @@
-import { Logger, ILogObj } from "tslog";
+import { Logger } from "tslog";
 
 // Create a logger with the "pretty" format:
 const logger = new Logger({

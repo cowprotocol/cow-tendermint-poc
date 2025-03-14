@@ -34,8 +34,8 @@ async function main() {
   const store = new infra.Store();
 
   // Setup Protocol
-  const domainProtocol = new domain.Protocol(validators, solvers, signer, store);
-  const protocol = new infra.Protocol(node, domainProtocol);
+  const consensus = new domain.Consensus(validators, solvers, signer, store);
+  const protocol = new infra.Protocol(node, consensus);
 
   if (mode == Mode.Validator || mode == Mode.Both) {
     const validator = new domain.Validator(
@@ -44,7 +44,7 @@ async function main() {
       signer,
       store,
     );
-    domainProtocol.validator = validator;
+    consensus.validator = validator;
   }
 
   if (mode == Mode.Solver || mode == Mode.Both) {
@@ -52,7 +52,7 @@ async function main() {
       protocol,
       signer,
     );
-    domainProtocol.solver = solver;
+    consensus.solver = solver;
   }
 }
 
