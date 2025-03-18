@@ -25,7 +25,7 @@ export class Signer {
         return ethers.verifyMessage(JSON.stringify(bid.payload), bid.signature);
     }
 
-    signPrevote(prevote: domain.PrevotePayload | domain.EmptyBidPayload) {
+    signPrevote(prevote: domain.PrevotePayload) {
         return this.wallet.signMessageSync(JSON.stringify(prevote));
     }
 
@@ -36,7 +36,7 @@ export class Signer {
         );
     }
 
-    signPrecommit(precommit: domain.PrecommitPayload | domain.EmptyBidPayload) {
+    signPrecommit(precommit: domain.PrecommitPayload) {
         return this.wallet.signMessageSync(JSON.stringify(precommit));
     }
 

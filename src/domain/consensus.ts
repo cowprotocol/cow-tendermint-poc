@@ -1,6 +1,6 @@
 import * as infra from '../infra';
 import * as domain from '../domain';
-import { Bid, Prevote, Precommit, BidPayload, EmptyBidPayload } from './model';
+import { Bid, Prevote, Precommit, BidPayload } from './model';
 import { Histogram } from 'prom-client';
 import { getBiddingStartTime } from './schedule';
 
@@ -172,7 +172,7 @@ export class Consensus {
         validators: string[],
     ) {
         // Check if we have enough pre-votes & commits for all bids
-        const bids: (BidPayload | EmptyBidPayload)[] = [];
+        const bids: BidPayload[] = [];
         for (const address of solvers) {
             const bid = this.store.getBid(auction, address);
             if (

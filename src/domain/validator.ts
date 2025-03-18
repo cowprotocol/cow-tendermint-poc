@@ -29,17 +29,11 @@ export class Validator {
     }
 
     public async onBid(bid: Bid, solver: string) {
-        const payload =
-            'value' in bid.payload
-                ? {
-                      auction: bid.payload.auction,
-                      solver,
-                      value: bid.payload.value,
-                  }
-                : {
-                      auction: bid.payload.auction,
-                      solver,
-                  };
+        const payload = {
+            auction: bid.payload.auction,
+            solver,
+            bid: Bid.hash(bid.payload),
+        };
         const prevote = {
             payload,
             signature: this.signer.signPrevote(payload),
@@ -65,16 +59,22 @@ export class Validator {
             }
 
             this.logger.debug(`Issuing vote for empty bid for ${address}`);
-            const payload = {
+            const bidPayload = {
                 auction,
                 solver: address,
+                solution: undefined as void,
             };
-
             this.store.addBid({
-                payload,
+                payload: bidPayload,
                 signature: '',
                 timestamp: Date.now(),
             });
+
+            const payload = {
+                auction,
+                solver: address,
+                bid: Bid.hash(bidPayload),
+            };
             const prevote = {
                 payload,
                 signature: this.signer.signPrevote(payload),

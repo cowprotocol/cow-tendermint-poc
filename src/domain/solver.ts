@@ -1,5 +1,5 @@
 import * as infra from '../infra';
-import { BidPayload, EmptyBidPayload } from './model';
+import { BidPayload } from './model';
 import { schedule, SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS } from './schedule';
 
 export class Solver {
@@ -20,10 +20,7 @@ export class Solver {
         }, SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS);
     }
 
-    onAuctionFinalized(
-        auction: number,
-        bids: (BidPayload | EmptyBidPayload)[],
-    ) {
+    onAuctionFinalized(auction: number, bids: BidPayload[]) {
         this.logger.info(
             `Auction ${auction} is finalized: ${JSON.stringify(bids)}`,
         );
@@ -33,7 +30,9 @@ export class Solver {
         const payload = {
             auction,
             solver: this.signer.address(),
-            value: Math.random(),
+            solution: {
+                score: Math.random(),
+            },
         };
         this.logger.info(`Issuing bid: ${JSON.stringify(payload)}`);
         this.protocol.bid({

@@ -1,16 +1,19 @@
+import { ethers } from 'ethers';
+
+export interface Solution {
+    score: number;
+}
+
+export type EmptySolution = void;
+
 export interface BidPayload {
     auction: number;
     solver: string;
-    value: number;
-}
-
-export interface EmptyBidPayload {
-    auction: number;
-    solver: string;
+    solution: Solution | EmptySolution;
 }
 
 export interface Bid {
-    payload: BidPayload | EmptyBidPayload;
+    payload: BidPayload;
     signature: string;
     timestamp: number;
 }
@@ -18,12 +21,12 @@ export interface Bid {
 export interface PrevotePayload {
     auction: number;
     solver: string;
-    // TODO replace with commitment to bid
-    value: number;
+    // Commitment (hash) to solution payload
+    bid: string;
 }
 
 export interface Prevote {
-    payload: PrevotePayload | EmptyBidPayload;
+    payload: PrevotePayload;
     signature: string;
     timestamp: number;
 }
@@ -31,13 +34,19 @@ export interface Prevote {
 export interface PrecommitPayload {
     auction: number;
     solver: string;
-    // TODO replace with commitment to bid
-    value: number;
+    // Commitment (hash) to solution payload
+    bid: string;
     // TODO add aggregated signature of prevotes
 }
 
 export interface Precommit {
-    payload: PrecommitPayload | EmptyBidPayload;
+    payload: PrecommitPayload;
     signature: string;
     timestamp: number;
+}
+
+export namespace Bid {
+    export function hash(bid: BidPayload) {
+        return ethers.keccak256(JSON.stringify(bid));
+    }
 }

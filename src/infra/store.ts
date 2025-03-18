@@ -5,19 +5,10 @@ export class Store {
     bids: Map<number, Map<string, domain.Bid>>;
 
     // Mapping of auction => (solver => (validator => prevote))
-    prevotes: Map<
-        number,
-        Map<string, Map<string, domain.PrevotePayload | domain.EmptyBidPayload>>
-    >;
+    prevotes: Map<number, Map<string, Map<string, domain.PrevotePayload>>>;
 
     // Mapping of auction => (solver => (validator => precommit))
-    precommits: Map<
-        number,
-        Map<
-            string,
-            Map<string, domain.PrecommitPayload | domain.EmptyBidPayload>
-        >
-    >;
+    precommits: Map<number, Map<string, Map<string, domain.PrecommitPayload>>>;
 
     constructor() {
         this.bids = new Map();
@@ -42,7 +33,7 @@ export class Store {
     addPrevote(
         auction: number,
         validator: string,
-        prevote: domain.PrevotePayload | domain.EmptyBidPayload,
+        prevote: domain.PrevotePayload,
     ) {
         this.ensureAuction(auction, prevote.solver);
         // TODO: same prevote is ok
@@ -57,13 +48,12 @@ export class Store {
         return true;
     }
 
-    getPrevoteCount(bid: domain.BidPayload | domain.EmptyBidPayload) {
+    getPrevoteCount(bid: domain.BidPayload) {
         let count = 0;
         for (const [, prevote] of this.prevotes
             .get(bid.auction)
             ?.get(bid.solver) || []) {
-            // TODO: proper equality check
-            if (JSON.stringify(prevote) === JSON.stringify(bid)) {
+            if (prevote.bid === domain.Bid.hash(bid)) {
                 count++;
             }
         }
@@ -73,7 +63,7 @@ export class Store {
     addPrecommit(
         auction: number,
         validator: string,
-        precommit: domain.PrecommitPayload | domain.EmptyBidPayload,
+        precommit: domain.PrecommitPayload,
     ) {
         this.ensureAuction(auction, precommit.solver);
         // TODO: same precommit is ok
@@ -89,13 +79,12 @@ export class Store {
         return true;
     }
 
-    getPrecommitCount(bid: domain.BidPayload | domain.EmptyBidPayload) {
+    getPrecommitCount(bid: domain.BidPayload) {
         let count = 0;
         for (const [, precommit] of this.precommits
             .get(bid.auction)
             ?.get(bid.solver) || []) {
-            // TODO: proper equality check
-            if (JSON.stringify(precommit) === JSON.stringify(bid)) {
+            if (precommit.bid === domain.Bid.hash(bid)) {
                 count++;
             }
         }
