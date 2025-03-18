@@ -1,10 +1,10 @@
 {
-  "name": "Node.js & TypeScript",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
-  "postCreateCommand": "cp env.example .env && npm ci",
-  "mounts": [
-    // Mount the host's SSH keys so you can push to GitHub
-    "source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached"
-  ],
-  "forwardPorts": [35035]
+    "name": "Node.js & TypeScript",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+    "postCreateCommand": "cp env.example .env && npm ci",
+    "mounts": [
+        // Mount the host's SSH keys so you can push to GitHub
+        "source=${localEnv:HOME}/.ssh,target=/home/node/.ssh,type=bind,consistency=cached"
+    ],
+    "forwardPorts": [35035]
 }

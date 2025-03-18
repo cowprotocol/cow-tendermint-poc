@@ -1,64 +1,79 @@
-import { Logger } from "tslog";
+import { Logger as TsLogger } from 'tslog';
 
 enum LogLevel {
-  SILLY = 0,
-  TRACE = 1,
-  DEBGUG = 2,
-  INFO = 3,
-  WARN = 4,
-  ERROR = 5,
-  FATAL = 6,
+    SILLY = 0,
+    TRACE = 1,
+    DEBGUG = 2,
+    INFO = 3,
+    WARN = 4,
+    ERROR = 5,
+    FATAL = 6,
 }
 
-function minLogLevel(component): LogLevel {
-  const logFilter = process.env.LOG_FILTER || "";
-  const filters = logFilter.split(',')
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
+function isLogLevelKey(key: string): key is keyof typeof LogLevel {
+    return key in LogLevel;
+}
 
-  let result = LogLevel.INFO;
-  for (const filter of filters) {
-    const [pattern, level] = filter.split('=').map(s => s.trim());
+function minLogLevel(component: string): LogLevel {
+    const logFilter = process.env.LOG_FILTER || '';
+    const filters = logFilter
+        .split(',')
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
 
-    if (level) {
-      // This filter is a mapping: pattern=level.
-      const regex = new RegExp(pattern);
-      if (regex.test(component)) {
-        result = LogLevel[level.toUpperCase()];
-      }
-    } else {
-      // No "=" found, so treat the entire filter as a default log level.
-      result = LogLevel[pattern.toUpperCase()];
+    let result = LogLevel.INFO;
+    for (const filter of filters) {
+        const [pattern, level] = filter.split('=').map((s) => s.trim());
+
+        if (level) {
+            // This filter is a mapping: pattern=level.
+            const regex = new RegExp(pattern);
+            if (regex.test(component)) {
+                const upperLevel = level.toUpperCase();
+                if (isLogLevelKey(upperLevel)) {
+                    result = LogLevel[upperLevel];
+                } else {
+                    throw new Error(`Invalid log level: ${level}`);
+                }
+            }
+        } else {
+            // No "=" found, so treat the entire filter as a default log level.
+            const upperLevel = level.toUpperCase();
+            if (isLogLevelKey(upperLevel)) {
+                result = LogLevel[upperLevel];
+            } else {
+                throw new Error(`Invalid log level: ${level}`);
+            }
+        }
     }
-  }
-  return result;
+    return result;
 }
 
-export function logger(component: string) { 
-  return new Logger({
-    type: "pretty",
-    stylePrettyLogs: true,
-    minLevel: minLogLevel(component),
-    prettyLogStyles: {
-      logLevelName: {
-        "*": ["blue", "bold"], // default style for all levels
-        SILLY: ["magenta", "dim"],
-        TRACE: ["white", "dim"],
-  
-        // Make DEBUG appear in a light gray / dim white:
-        DEBUG: ["white", "dim"],
-  
-        INFO: ["green", "bold"],
-        WARN: ["yellow", "bold"],
-        ERROR: ["red", "bold"],
-        FATAL: ["red", "bold", "underline"],
-      },
-      filePathWithLine: "dim",
-    },
-    prettyInspectOptions: {
-      depth: 4,
-    },
-  });
- };
+export function logger(component: string): TsLogger<void> {
+    return new TsLogger({
+        type: 'pretty',
+        stylePrettyLogs: true,
+        minLevel: minLogLevel(component),
+        prettyLogStyles: {
+            logLevelName: {
+                '*': ['blue', 'bold'], // default style for all levels
+                SILLY: ['magenta', 'dim'],
+                TRACE: ['white', 'dim'],
 
-export { Logger } from "tslog";
+                // Make DEBUG appear in a light gray / dim white:
+                DEBUG: ['white', 'dim'],
+
+                INFO: ['green', 'bold'],
+                WARN: ['yellow', 'bold'],
+                ERROR: ['red', 'bold'],
+                FATAL: ['red', 'bold', 'underline'],
+            },
+            filePathWithLine: 'dim',
+        },
+        prettyInspectOptions: {
+            depth: 4,
+        },
+    });
+}
+
+export type Logger = TsLogger<void>;

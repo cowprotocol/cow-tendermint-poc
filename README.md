@@ -57,7 +57,6 @@ MULTIADDRESS=/dns4/<container name>-<uid>-<port>.app.github.dev/tcp/443/wss
 > Ensure, that the port's visibility is set to public.
 > ![Codespace port visibility](img/codespace_port.png)
 
-
 ### Debugging
 
 To configure custom log sensititvity, you can specify a log filter like:
@@ -67,6 +66,7 @@ LOG_FILTER=info,libp2p=trace,consensus=debug
 ```
 
 To access lower level logs of the external libp2p library, also set
+
 ```
 DEBUG=libp2p*
 ```
