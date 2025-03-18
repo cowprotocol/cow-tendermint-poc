@@ -59,21 +59,13 @@ export class Validator {
             }
 
             this.logger.debug(`Issuing vote for empty bid for ${address}`);
-            const bidPayload = {
-                auction,
-                solver: address,
-                solution: undefined as void,
-            };
-            this.store.addBid({
-                payload: bidPayload,
-                signature: '',
-                timestamp: Date.now(),
-            });
+            const bid = Bid.empty(auction, address);
+            this.store.addBid(bid);
 
             const payload = {
                 auction,
                 solver: address,
-                bid: Bid.hash(bidPayload),
+                bid: Bid.hash(bid.payload),
             };
             const prevote = {
                 payload,

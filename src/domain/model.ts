@@ -1,4 +1,5 @@
 import { ethers } from 'ethers';
+import { getVoteStartTime } from './schedule';
 
 export interface Solution {
     score: number;
@@ -46,7 +47,19 @@ export interface Precommit {
 }
 
 export namespace Bid {
+    export function empty(auction: number, solver: string): Bid {
+        return {
+            payload: {
+                auction,
+                solver,
+                solution: undefined,
+            },
+            signature: '',
+            timestamp: getVoteStartTime(auction),
+        };
+    }
+
     export function hash(bid: BidPayload) {
-        return ethers.keccak256(JSON.stringify(bid));
+        return ethers.keccak256(ethers.toUtf8Bytes(JSON.stringify(bid)));
     }
 }

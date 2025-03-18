@@ -33,8 +33,9 @@ function step(
 }
 
 export function getBiddingStartTime(auction: number) {
-    return (
-        (auction + 1) * AUCTION_FREQUENCY_MILLIS -
-        SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS
-    );
+    return getVoteStartTime(auction) - SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS;
+}
+
+export function getVoteStartTime(auction: number) {
+    return (auction + 1) * AUCTION_FREQUENCY_MILLIS;
 }

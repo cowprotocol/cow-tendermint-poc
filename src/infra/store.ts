@@ -18,9 +18,11 @@ export class Store {
 
     addBid(bid: domain.Bid) {
         this.ensureAuction(bid.payload.auction, bid.payload.solver);
-        // TODO exact same bid is ok
-        if (this.bids.get(bid.payload.auction)!.has(bid.payload.solver)) {
-            return false;
+        const existing = this.bids
+            .get(bid.payload.auction)!
+            .get(bid.payload.solver);
+        if (existing) {
+            return existing === bid;
         }
         this.bids.get(bid.payload.auction)!.set(bid.payload.solver, bid);
         return true;
@@ -36,9 +38,12 @@ export class Store {
         prevote: domain.PrevotePayload,
     ) {
         this.ensureAuction(auction, prevote.solver);
-        // TODO: same prevote is ok
-        if (this.prevotes.get(auction)!.get(prevote.solver)!.has(validator)) {
-            return false;
+        const existing = this.prevotes
+            .get(auction)!
+            .get(prevote.solver)!
+            .get(validator);
+        if (existing) {
+            return existing === prevote;
         }
 
         this.prevotes
@@ -67,10 +72,12 @@ export class Store {
     ) {
         this.ensureAuction(auction, precommit.solver);
         // TODO: same precommit is ok
-        if (
-            this.precommits.get(auction)!.get(precommit.solver)!.has(validator)
-        ) {
-            return false;
+        const existing = this.precommits
+            .get(auction)!
+            .get(precommit.solver)!
+            .get(validator);
+        if (existing) {
+            return existing === precommit;
         }
         this.precommits
             .get(auction)!

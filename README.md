@@ -20,7 +20,7 @@ There are two types of nodes, validators and solvers. Make sure your signing key
 You can run either mode by specifying:
 
 ```bash
-npx tsx index.ts <validator|solver>
+npm run <validator|solver>
 ```
 
 If neither is specified, the client will run in both modes.
@@ -34,13 +34,13 @@ The node will periodically print its peer count. Make sure you are connected to 
 The node will automatically find peers on a local network. To connect to a remote peer you can pass their multiaddress in as a command-line argument like:
 
 ```bash
-npx tsx index.ts /ip4/<IP>/tcp/<port>/wss/p2p/<peer_id>
+npm run validator /ip4/<IP>/tcp/<port>/wss/p2p/<peer_id>
 ```
 
 To connect to a client running as a github devcontainer, you can use their container's DNS like:
 
 ```
-npx tsx index.ts /dns4/<codespace_url>/tcp/443/wss/p2p/<peer_id>
+npm run solver /dns4/<codespace_url>/tcp/443/wss/p2p/<peer_id>
 ```
 
 ### Getting Discovered

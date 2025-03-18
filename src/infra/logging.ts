@@ -3,7 +3,7 @@ import { Logger as TsLogger } from 'tslog';
 enum LogLevel {
     SILLY = 0,
     TRACE = 1,
-    DEBGUG = 2,
+    DEBUG = 2,
     INFO = 3,
     WARN = 4,
     ERROR = 5,
@@ -38,7 +38,7 @@ function minLogLevel(component: string): LogLevel {
             }
         } else {
             // No "=" found, so treat the entire filter as a default log level.
-            const upperLevel = level.toUpperCase();
+            const upperLevel = pattern.toUpperCase();
             if (isLogLevelKey(upperLevel)) {
                 result = LogLevel[upperLevel];
             } else {

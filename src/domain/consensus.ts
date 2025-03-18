@@ -91,17 +91,16 @@ export class Consensus {
             return;
         }
 
-        const bid = this.store.getBid(
-            prevote.payload.auction,
-            prevote.payload.solver,
-        );
+        const bid =
+            this.store.getBid(
+                prevote.payload.auction,
+                prevote.payload.solver,
+            ) || Bid.empty(prevote.payload.auction, prevote.payload.solver);
 
         if (
-            // We can't precommit if we don't have a bid
-            !bid ||
-            // Or if we haven't received enough prevotes
+            // We haven't received enough prevotes
             this.store.getPrevoteCount(bid.payload) !==
-                Math.ceil((validatorCount * 2) / 3)
+            Math.ceil((validatorCount * 2) / 3)
         ) {
             return;
         }
@@ -143,22 +142,19 @@ export class Consensus {
             return;
         }
 
-        const bid = this.store.getBid(
-            precommit.payload.auction,
-            precommit.payload.solver,
-        );
+        const bid =
+            this.store.getBid(
+                precommit.payload.auction,
+                precommit.payload.solver,
+            ) || Bid.empty(precommit.payload.auction, precommit.payload.solver);
         if (
-            // We can't finalize if we don't have a bid
-            !bid ||
-            // Or if we haven't received enough precommits
+            // We haven't received enough precommits
             this.store.getPrecommitCount(bid.payload) !==
-                Math.ceil((validators.length * 2) / 3)
+            Math.ceil((validators.length * 2) / 3)
         ) {
             return;
         }
-        this.logger.debug(
-            `Bid ${JSON.stringify(precommit.payload)} is finalized.`,
-        );
+        this.logger.debug(`Bid ${JSON.stringify(bid)} is finalized.`);
 
         this.onPrecommitQuorum(precommit.payload.auction, solvers, validators);
         Metrics.precommitQuorumLatency.observe(
@@ -174,11 +170,12 @@ export class Consensus {
         // Check if we have enough pre-votes & commits for all bids
         const bids: BidPayload[] = [];
         for (const address of solvers) {
-            const bid = this.store.getBid(auction, address);
+            const bid =
+                this.store.getBid(auction, address) ||
+                Bid.empty(auction, address);
             if (
-                !bid ||
                 this.store.getPrevoteCount(bid.payload) <
-                    Math.ceil((validators.length * 2) / 3)
+                Math.ceil((validators.length * 2) / 3)
             ) {
                 return;
             }
