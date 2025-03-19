@@ -2,6 +2,9 @@ import * as infra from '../infra';
 import { BidPayload } from './model';
 import { schedule, SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS } from './schedule';
 
+/**
+ * Component responsible for casting solver bids and follow consensus to derive the winner of the auction.
+ */
 export class Solver {
     protocol: infra.Protocol;
     signer: infra.Signer;
@@ -20,13 +23,19 @@ export class Solver {
         }, SOLVER_BIDDING_BEFORE_DEADLINE_MILLIS);
     }
 
-    onAuctionFinalized(auction: number, bids: BidPayload[]) {
+    /**
+     * Callback for when an auction is finalized.
+     *
+     * @param auction the auction id that was finalized
+     * @param bids the complete list of bids (including empty ones) from all solvers for the auction
+     */
+    public onAuctionFinalized(auction: number, bids: BidPayload[]) {
         this.logger.info(
             `Auction ${auction} is finalized: ${JSON.stringify(bids)}`,
         );
     }
 
-    bid(auction: number) {
+    private bid(auction: number) {
         const payload = {
             auction,
             solver: this.signer.address(),

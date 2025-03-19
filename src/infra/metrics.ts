@@ -2,15 +2,15 @@ import * as http from 'http';
 import { register } from 'prom-client';
 import { logger } from './logging';
 
+/**
+ * Serves Prometheus metrics on the given port.
+ *
+ * @param port to serve metrics on, defaults to a random open port
+ */
 export function serve(port?: number) {
     const metricsServer = http.createServer(async (req, res) => {
-        if (req.url === '/metrics') {
-            res.writeHead(200, { 'Content-Type': register.contentType });
-            res.end(await register.metrics());
-        } else {
-            res.writeHead(404);
-            res.end('Not Found');
-        }
+        res.writeHead(200, { 'Content-Type': register.contentType });
+        res.end(await register.metrics());
     });
 
     metricsServer.listen(port, () => {

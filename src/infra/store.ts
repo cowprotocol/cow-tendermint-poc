@@ -1,5 +1,8 @@
 import * as domain from '../domain';
 
+/**
+ * Simple in-memory store for domain specific data types.
+ */
 export class Store {
     // Mapping of auction => (solver => bid)
     bids: Map<number, Map<string, domain.Bid>>;
@@ -16,7 +19,13 @@ export class Store {
         this.precommits = new Map();
     }
 
-    addBid(bid: domain.Bid) {
+    /**
+     * Store a bid. Bids are stored per auction and solver.
+     *
+     * @param bid the bid to add
+     * @returns false, if a conflicting bid already exists, true otherwise
+     */
+    public addBid(bid: domain.Bid): boolean {
         this.ensureAuction(bid.payload.auction, bid.payload.solver);
         const existing = this.bids
             .get(bid.payload.auction)!
@@ -28,11 +37,26 @@ export class Store {
         return true;
     }
 
-    getBid(auction: number, solver: string) {
+    /**
+     * Retrieve a bid by auction and solver.
+     *
+     * @param auction the auction id
+     * @param solver the solver address
+     * @returns the bid or undefined if not found
+     */
+    public getBid(auction: number, solver: string): domain.Bid | undefined {
         return this.bids.get(auction)?.get(solver);
     }
 
-    addPrevote(
+    /**
+     * Store a prevote. Prevotes are stored per auction, solver and validator.
+     *
+     * @param auction the auction id
+     * @param validator the validator address that casted the vote
+     * @param prevote prevote payload
+     * @returns false, if a conflicting prevote already exists, true otherwise
+     */
+    public addPrevote(
         auction: number,
         validator: string,
         prevote: domain.PrevotePayload,
@@ -53,7 +77,13 @@ export class Store {
         return true;
     }
 
-    getPrevoteCount(bid: domain.BidPayload) {
+    /**
+     * Count the number of prevotes stored for a given bid.
+     *
+     * @param bid the bid to count prevotes for
+     * @returns the number of prevotes
+     */
+    public getPrevoteCount(bid: domain.BidPayload): number {
         let count = 0;
         for (const [, prevote] of this.prevotes
             .get(bid.auction)
@@ -65,13 +95,19 @@ export class Store {
         return count;
     }
 
-    addPrecommit(
+    /**
+     *
+     * @param auction the auction id
+     * @param validator the validator address that casted the precommit
+     * @param precommit precommit payload
+     * @returns false, if a conflicting precommit already exists, true otherwise
+     */
+    public addPrecommit(
         auction: number,
         validator: string,
         precommit: domain.PrecommitPayload,
     ) {
         this.ensureAuction(auction, precommit.solver);
-        // TODO: same precommit is ok
         const existing = this.precommits
             .get(auction)!
             .get(precommit.solver)!
@@ -86,7 +122,13 @@ export class Store {
         return true;
     }
 
-    getPrecommitCount(bid: domain.BidPayload) {
+    /**
+     * Count the number of precommits stored for a given bid.
+     *
+     * @param bid the bid to count precommits for
+     * @returns the number of precommits
+     */
+    public getPrecommitCount(bid: domain.BidPayload) {
         let count = 0;
         for (const [, precommit] of this.precommits
             .get(bid.auction)
@@ -98,7 +140,7 @@ export class Store {
         return count;
     }
 
-    ensureAuction(auction: number, solver: string) {
+    private ensureAuction(auction: number, solver: string) {
         if (!this.bids.has(auction)) {
             this.bids.set(auction, new Map());
         }

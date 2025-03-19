@@ -16,12 +16,21 @@ import { PeerDiscovery, PubSub } from '@libp2p/interface';
 // Mapping of topic to message handler
 type Listener = { [id: string]: (message: Uint8Array) => void };
 
+/**
+ * Implementation of a libp2p node that can be used to send and receive messages. The latter can be subscribed to by adding listeners.
+ */
 export class Node {
     node: Promise<Libp2p>;
     listeners: Listener[];
     logger: Logger;
 
-    constructor(bootstapNode?: string, port?: number, multiaddress?: string) {
+    /**
+     *
+     * @param bootstrapNode optional multiaddress of a node to bootstrap peers from
+     * @param port optional port to listen on (default: random open port)
+     * @param multiaddress: optional own multiaddress to announce to peers for connection (e.g. if this node is behind a NAT)
+     */
+    constructor(bootstrapNode?: string, port?: number, multiaddress?: string) {
         // local variable needed for .then() callbacks
         this.logger = createLogger('libp2p');
         const logger = this.logger;
@@ -31,10 +40,10 @@ export class Node {
         // Set up peer discovery
         const peerDiscovery: Array<(components: Components) => PeerDiscovery> =
             [mdns(), pubsubPeerDiscovery()];
-        if (bootstapNode) {
+        if (bootstrapNode) {
             peerDiscovery.push(
                 bootstrap({
-                    list: [bootstapNode],
+                    list: [bootstrapNode],
                 }),
             );
         }
@@ -94,6 +103,11 @@ export class Node {
         });
     }
 
+    /**
+     * Add a listener. The message handler for a given topic will be called when a message is received on that topic.
+     *
+     * @param listener mapping of topic to message handler
+     */
     public async addListener(listener: Listener) {
         const logger = this.logger;
         this.node
@@ -116,6 +130,12 @@ export class Node {
             });
     }
 
+    /**
+     * Publish a message on a topic.
+     *
+     * @param topic the topic to publish on
+     * @param payload the message to publish
+     */
     public async publish(topic: string, payload: Uint8Array) {
         const node = await this.node;
         const logger = this.logger;

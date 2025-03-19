@@ -58,7 +58,7 @@ export class Consensus {
             return;
         }
 
-        this.validator?.onBid(bid, solver);
+        this.validator?.onBid(bid);
     }
 
     public async onPrevote(prevote: Prevote) {

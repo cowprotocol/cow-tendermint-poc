@@ -10,14 +10,29 @@ const ABI = [
     },
 ];
 
+/**
+ * Wrapper for on-chain registry contract that manages the current set of participants.
+ * Note, that there are separate instances for solvers and validators.
+ */
 export class Registry {
     contract;
 
+    /**
+     * Creates a new registry instance.
+     *
+     * @param rpc the RPC provider
+     * @param address the address of the deployed registry contract
+     */
     constructor(rpc: ethers.ContractRunner, address: string) {
         this.contract = new ethers.Contract(address, ABI, rpc);
     }
 
-    async getAddresses() {
+    /**
+     * Retrieve the current set of participants.
+     *
+     * @returns the list of participants
+     */
+    public async getAddresses(): Promise<string[]> {
         return await this.contract.getAddresses();
     }
 }

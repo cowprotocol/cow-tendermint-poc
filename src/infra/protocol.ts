@@ -15,7 +15,61 @@ export class Protocol {
         node.addListener(this.toListener());
     }
 
-    public toListener() {
+    /**
+     * Publish a bid to the network (including ourselves).
+     *
+     * @param payload the bid to cast
+     */
+    public async bid(payload: domain.Bid) {
+        const serialized = JSON.stringify(payload);
+        this.node.publish(
+            '/cow/0.0.1/bid',
+            new TextEncoder().encode(serialized),
+        );
+        this.onBid(payload);
+    }
+
+    /**
+     * Publish a prevote to the network (including ourselves).
+     *
+     * @param payload the prevote to cast
+     */
+    public async prevote(payload: domain.Prevote) {
+        const serialized = JSON.stringify(payload);
+        this.node.publish(
+            '/cow/0.0.1/prevote',
+            new TextEncoder().encode(serialized),
+        );
+        this.onPrevote(payload);
+    }
+
+    /**
+     * Publish a precommit to the network (including ourselves).
+     *
+     * @param payload the precommit to cast
+     */
+    public async precommit(payload: domain.Precommit) {
+        const serialized = JSON.stringify(payload);
+        this.node.publish(
+            '/cow/0.0.1/precommit',
+            new TextEncoder().encode(serialized),
+        );
+        this.onPrecommit(payload);
+    }
+
+    private onBid(bid: domain.Bid) {
+        this.domain.onBid(bid);
+    }
+
+    private onPrevote(prevote: domain.Prevote) {
+        this.domain.onPrevote(prevote);
+    }
+
+    private onPrecommit(precommit: domain.Precommit) {
+        this.domain.onPrecommit(precommit);
+    }
+
+    private toListener() {
         return {
             '/cow/0.0.1/bid': (data: Uint8Array) => {
                 const payload = new TextDecoder().decode(data);
@@ -33,44 +87,5 @@ export class Protocol {
                 this.onPrecommit(precommit);
             },
         };
-    }
-
-    public onBid(bid: domain.Bid) {
-        this.domain.onBid(bid);
-    }
-
-    public onPrevote(prevote: domain.Prevote) {
-        this.domain.onPrevote(prevote);
-    }
-
-    public onPrecommit(precommit: domain.Precommit) {
-        this.domain.onPrecommit(precommit);
-    }
-
-    public async bid(payload: domain.Bid) {
-        const serialized = JSON.stringify(payload);
-        this.node.publish(
-            '/cow/0.0.1/bid',
-            new TextEncoder().encode(serialized),
-        );
-        this.onBid(payload);
-    }
-
-    public async prevote(payload: domain.Prevote) {
-        const serialized = JSON.stringify(payload);
-        this.node.publish(
-            '/cow/0.0.1/prevote',
-            new TextEncoder().encode(serialized),
-        );
-        this.onPrevote(payload);
-    }
-
-    public async precommit(payload: domain.Precommit) {
-        const serialized = JSON.stringify(payload);
-        this.node.publish(
-            '/cow/0.0.1/precommit',
-            new TextEncoder().encode(serialized),
-        );
-        this.onPrecommit(payload);
     }
 }

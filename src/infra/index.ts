@@ -1,3 +1,5 @@
+// Re-exports of all infra related modules for use in the domain.
+
 export * from './libp2p';
 export * from './protocol';
 export * from './logging';
