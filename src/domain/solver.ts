@@ -33,6 +33,10 @@ export class Solver {
         this.logger.info(
             `Auction ${auction} is finalized: ${JSON.stringify(bids)}`,
         );
+        const winning = bids.sort((a,b) =>(b.solution?.score || 0) - (a.solution?.score || 0))[0]
+        if(winning.solver === this.signer.address()) {
+            this.logger.warn(`I won with ${winning.solution?.score}`)
+        }
     }
 
     private bid(auction: number) {
