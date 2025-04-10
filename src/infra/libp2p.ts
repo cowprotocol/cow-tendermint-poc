@@ -63,12 +63,13 @@ export class Node {
             connectionEncrypters: [noise()],
             peerDiscovery,
             services: {
-                pubsub: gossipsub(),
+                pubsub: gossipsub({allowPublishToZeroTopicPeers: true}),
                 identify: identify(),
                 upnpNAT: uPnPNAT({
                     autoConfirmAddress: true,
                 }),
             },
+            
         }).then((node) => {
             logger.info(
                 `Node started, peers can connect via: [${node.getMultiaddrs()}]`,
